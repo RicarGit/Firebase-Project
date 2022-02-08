@@ -28,6 +28,8 @@ const getDbData = async games => {
         <li>Desenvolvido por ${developedBy}</li>
         <li>Adicionado no banco em ${createdAt.toDate()}</li>
       </ul>
+
+      <button class="btn btn-danger btn-sm">Remover</button>
     </li>`
     return acc
   }, '')
