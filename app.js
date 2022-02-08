@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js'
-import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js'
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCJdfhVE1hd7QBMLgksySdFaahdlvg0L5Y',
@@ -11,17 +11,19 @@ const firebaseConfig = {
   measurementId: 'G-7QZ8HSQDRB'
 }
 
+const gamesList = document.querySelector('[data-js="games-list"]')
+const formAddGame = document.querySelector('[data-js="add-game-form"]')
+
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
-
-const games = collection(db, 'games')
+const collectionGames = collection(db, 'games')
 
 const getDbData = async games => {
   const querySnapshot = await getDocs(games)
   const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
     const { title, developedBy, createdAt } = doc.data()
 
-    acc += `<li class="my-4">
+    acc += `<li data-id="${doc.id}" class="my-4">
       <h5>${title}</h5>
 
       <ul>
@@ -29,13 +31,46 @@ const getDbData = async games => {
         <li>Adicionado no banco em ${createdAt.toDate()}</li>
       </ul>
 
-      <button class="btn btn-danger btn-sm">Remover</button>
+      <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
     </li>`
     return acc
   }, '')
 
-  const gamesList = document.querySelector('[data-js="games-list"]')
   gamesList.innerHTML += gamesLis
 }
 
-getDbData(games)
+formAddGame.addEventListener('submit', async e => {
+  e.preventDefault()
+
+  try {
+    const collectionData = await addDoc(collectionGames, {
+      title: e.target.title.value.trim(),
+      developedBy: e.target.developer.value.trim(),
+      createdAt: serverTimestamp()
+    })
+
+    return console.log('Document criado com o ID', collectionData.id)
+  } catch (error) {
+    console.log(error.message)
+  }
+})
+
+gamesList.addEventListener('click', async e => {
+  const removeButtonId = e.target.dataset.remove
+
+  if (removeButtonId) {
+    const game = document.querySelector(`[data-id="${removeButtonId}"]`)
+    const dbGame = doc(db, 'games', removeButtonId)
+    const gameTitle = game.children[0].textContent
+
+    try {
+      deleteDoc(dbGame)
+      game.remove()
+      console.log(`Jogo "${gameTitle}" foi removido com sucesso!.`)
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
+})
+
+getDbData(collectionGames)
