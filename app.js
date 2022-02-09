@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js'
-import { getFirestore, collection, getDocs, addDoc, serverTimestamp, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js'
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCJdfhVE1hd7QBMLgksySdFaahdlvg0L5Y',
@@ -76,3 +76,12 @@ const deleteDocGame = async e => {
 gamesList.addEventListener('click', deleteDocGame)
 formAddGame.addEventListener('submit', createDocGame)
 getDbData(collectionGames)
+
+// The code below shows how to modificate the doc when needed
+
+// const eldenRingRef = doc(db, 'games', 'rAlBUm3aTBpRyVoNt1gn') //doc id inserted manually
+// updateDoc(eldenRingRef, { title: 'Demon\s Souls', newField: 'field criado' })
+//   .then(console.log('Jogo atualizado!'))
+//   .catch(console.log)
+
+// The updateDoc create a new field if the field does not exists on that doc
