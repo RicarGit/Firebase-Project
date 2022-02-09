@@ -39,7 +39,7 @@ const getDbData = async games => {
   gamesList.innerHTML += gamesLis
 }
 
-formAddGame.addEventListener('submit', async e => {
+const createDocGame = async e => {
   e.preventDefault()
 
   try {
@@ -53,9 +53,9 @@ formAddGame.addEventListener('submit', async e => {
   } catch (error) {
     console.log(error.message)
   }
-})
+}
 
-gamesList.addEventListener('click', async e => {
+const deleteDocGame = async e => {
   const removeButtonId = e.target.dataset.remove
 
   if (removeButtonId) {
@@ -71,6 +71,8 @@ gamesList.addEventListener('click', async e => {
       console.log(error.message)
     }
   }
-})
+}
 
+gamesList.addEventListener('click', deleteDocGame)
+formAddGame.addEventListener('submit', createDocGame)
 getDbData(collectionGames)
