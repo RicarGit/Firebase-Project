@@ -39,12 +39,6 @@ const createDocLis = querySnapshot => {
   gamesList.innerHTML = gamesLis
 }
 
-onSnapshot(collectionGames, querySnapshot => {
-  if (!querySnapshot.metadata.hasPendingWrites) {
-    createDocLis(querySnapshot)
-  }
-})
-
 const createDocGame = async e => {
   e.preventDefault()
 
@@ -56,8 +50,10 @@ const createDocGame = async e => {
     })
 
     console.log('Document criado com o ID', collectionData.id)
-  } catch (error) {
-    console.log(error.message)
+    e.target.reset()
+    e.target.title.focus()
+  } catch ({ message }) {
+    console.log(message)
   }
 }
 
@@ -67,11 +63,20 @@ const deleteDocGame = e => {
   if (removeButtonId) {
     const dbGame = doc(db, 'games', removeButtonId)
 
-    deleteDoc(dbGame)
-      .then(console.log('Jogo removido com sucesso!'))
-      .catch(console.log)
+    try {
+      deleteDoc(dbGame)
+      console.log('Jogo removido com sucesso!')
+    } catch ({ message }) {
+      console.log(message)
+    }
   }
 }
+
+onSnapshot(collectionGames, querySnapshot => {
+  if (!querySnapshot.metadata.hasPendingWrites) {
+    createDocLis(querySnapshot)
+  }
+})
 
 formAddGame.addEventListener('submit', createDocGame)
 gamesList.addEventListener('click', deleteDocGame)
