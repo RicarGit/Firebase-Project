@@ -18,6 +18,10 @@ const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 const collectionGames = collection(db, 'games')
 
+const getFormattedDateAndTime = createdAt => new Intl
+  .DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+  .format(createdAt.toDate())
+
 const createDocLis = querySnapshot => {
   const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
     const { title, developedBy, createdAt } = doc.data()
@@ -27,7 +31,7 @@ const createDocLis = querySnapshot => {
   
         <ul>
           <li>Desenvolvido por ${developedBy}</li>
-          <li>Adicionado no banco em ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(createdAt.toDate())}</li>
+          <li>Adicionado no banco em ${getFormattedDateAndTime(createdAt)}</li>
         </ul>
   
         <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
