@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js'
-import { getFirestore, collection, getDocs, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js'
+import { getFirestore, collection, getDocs, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCJdfhVE1hd7QBMLgksySdFaahdlvg0L5Y',
@@ -18,26 +18,27 @@ const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 const collectionGames = collection(db, 'games')
 
-const getDbData = async games => {
-  const querySnapshot = await getDocs(games)
-  const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
-    const { title, developedBy, createdAt } = doc.data()
+onSnapshot(collectionGames, querySnapshot => {
+  if (!querySnapshot.metadata.hasPendingWrites) {
+    const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
+      const { title, developedBy, createdAt } = doc.data()
 
-    acc += `<li data-id="${doc.id}" class="my-4">
-      <h5>${title}</h5>
+      acc += `<li data-id="${doc.id}" class="my-4">
+        <h5>${title}</h5>
+  
+        <ul>
+          <li>Desenvolvido por ${developedBy}</li>
+          <li>Adicionado no banco em ${createdAt.toDate()}</li>
+        </ul>
+  
+        <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
+      </li>`
+      return acc
+    }, '')
 
-      <ul>
-        <li>Desenvolvido por ${developedBy}</li>
-        <li>Adicionado no banco em ${createdAt.toDate()}</li>
-      </ul>
-
-      <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
-    </li>`
-    return acc
-  }, '')
-
-  gamesList.innerHTML += gamesLis
-}
+    gamesList.innerHTML = gamesLis
+  }
+})
 
 const createDocGame = async e => {
   e.preventDefault()
@@ -55,27 +56,20 @@ const createDocGame = async e => {
   }
 }
 
-const deleteDocGame = async e => {
+const deleteDocGame = e => {
   const removeButtonId = e.target.dataset.remove
 
   if (removeButtonId) {
-    const game = document.querySelector(`[data-id="${removeButtonId}"]`)
     const dbGame = doc(db, 'games', removeButtonId)
-    const gameTitle = game.children[0].textContent
 
-    try {
-      deleteDoc(dbGame)
-      game.remove()
-      console.log(`Jogo "${gameTitle}" foi removido com sucesso!.`)
-    } catch (error) {
-      console.log(error.message)
-    }
+    deleteDoc(dbGame)
+      .then(console.log('Jogo removido com sucesso!'))
+      .catch(console.log)
   }
 }
 
-gamesList.addEventListener('click', deleteDocGame)
 formAddGame.addEventListener('submit', createDocGame)
-getDbData(collectionGames)
+gamesList.addEventListener('click', deleteDocGame)
 
 // The code below shows how to modificate the doc when needed
 
