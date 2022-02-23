@@ -18,12 +18,11 @@ const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 const collectionGames = collection(db, 'games')
 
-onSnapshot(collectionGames, querySnapshot => {
-  if (!querySnapshot.metadata.hasPendingWrites) {
-    const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
-      const { title, developedBy, createdAt } = doc.data()
+const createDocLis = querySnapshot => {
+  const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
+    const { title, developedBy, createdAt } = doc.data()
 
-      acc += `<li data-id="${doc.id}" class="my-4">
+    acc += `<li data-id="${doc.id}" class="my-4">
         <h5>${title}</h5>
   
         <ul>
@@ -33,10 +32,16 @@ onSnapshot(collectionGames, querySnapshot => {
   
         <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
       </li>`
-      return acc
-    }, '')
 
-    gamesList.innerHTML = gamesLis
+    return acc
+  }, '')
+
+  gamesList.innerHTML = gamesLis
+}
+
+onSnapshot(collectionGames, querySnapshot => {
+  if (!querySnapshot.metadata.hasPendingWrites) {
+    createDocLis(querySnapshot)
   }
 })
 
@@ -50,7 +55,7 @@ const createDocGame = async e => {
       createdAt: serverTimestamp()
     })
 
-    return console.log('Document criado com o ID', collectionData.id)
+    console.log('Document criado com o ID', collectionData.id)
   } catch (error) {
     console.log(error.message)
   }
