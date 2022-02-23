@@ -28,7 +28,7 @@ onSnapshot(collectionGames, querySnapshot => {
   
         <ul>
           <li>Desenvolvido por ${developedBy}</li>
-          <li>Adicionado no banco em ${createdAt.toDate()}</li>
+          <li>Adicionado no banco em ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(createdAt.toDate())}</li>
         </ul>
   
         <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
