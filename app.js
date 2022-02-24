@@ -76,11 +76,14 @@ const deleteDocGame = e => {
   }
 }
 
+const handleSnapshotError = error => console.log(error)
+
 onSnapshot(collectionGames, querySnapshot => {
   if (!querySnapshot.metadata.hasPendingWrites) {
     createDocLis(querySnapshot)
   }
-})
+
+}, handleSnapshotError)
 
 formAddGame.addEventListener('submit', createDocGame)
 gamesList.addEventListener('click', deleteDocGame)
