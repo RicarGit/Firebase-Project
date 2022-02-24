@@ -61,18 +61,20 @@ const createDocGame = async e => {
   }
 }
 
-const deleteDocGame = e => {
+const deleteDocGame = async e => {
   const removeButtonId = e.target.dataset.remove
 
-  if (removeButtonId) {
-    const dbGame = doc(db, 'games', removeButtonId)
+  if (!removeButtonId) {
+    return
+  }
 
-    try {
-      deleteDoc(dbGame)
+  try {
+    const dbGame = doc(db, 'games', removeButtonId)
+    await deleteDoc(dbGame)
+
       console.log('Jogo removido com sucesso!')
     } catch ({ message }) {
       console.log(message)
-    }
   }
 }
 
