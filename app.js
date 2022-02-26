@@ -22,25 +22,34 @@ const getFormattedDateAndTime = createdAt => new Intl
   .DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
   .format(createdAt.toDate())
 
-const createDocLis = querySnapshot => {
-  const gamesLis = querySnapshot.docs.reduce((acc, doc) => {
-    const { title, developedBy, createdAt } = doc.data()
+const renderGameList = snapshot => {
+  snapshot.docs.forEach(doc => {
+    const [id, { title, developedBy, createdAt }] = [doc.id, doc.data()]
 
-    acc += `<li data-id="${doc.id}" class="my-4">
-        <h5>${title}</h5>
-  
-        <ul>
-          <li>Desenvolvido por ${developedBy}</li>
-          <li>Adicionado no banco em ${getFormattedDateAndTime(createdAt)}</li>
-        </ul>
-  
-        <button data-remove="${doc.id}" class="btn btn-danger btn-sm">Remover</button>
-      </li>`
+    const gameTitle = document.createElement('h5')
+    gameTitle.textContent = title
 
-    return acc
-  }, '')
+    const ul = document.createElement('ul')
 
-  gamesList.innerHTML = gamesLis
+    const gameLi = document.createElement('li')
+    gameLi.setAttribute('class', 'my-4')
+    gameLi.setAttribute('data-id', id)
+
+    const button = document.createElement('button')
+    button.setAttribute('data-remove', id)
+    button.setAttribute('class', 'btn btn-danger btn-sm')
+    button.textContent = 'Remover'
+
+    const developedByLi = document.createElement('li')
+    developedByLi.textContent = `Desenvolvido por ${developedBy}`
+
+    const createdAtLi = document.createElement('li')
+    createdAtLi.textContent = `Adicionado no banco em ${getFormattedDateAndTime(createdAt)}`
+
+    gameLi.append(gameTitle, ul, button)
+    ul.append(developedByLi, createdAtLi)
+    gamesList.append(gameLi)
+  })
 }
 
 const createDocGame = async e => {
@@ -72,17 +81,18 @@ const deleteDocGame = async e => {
     const dbGame = doc(db, 'games', removeButtonId)
     await deleteDoc(dbGame)
 
-      console.log('Jogo removido com sucesso!')
-    } catch ({ message }) {
-      console.log(message)
+    console.log('Jogo removido com sucesso!')
+  } catch ({ message }) {
+    console.log(message)
   }
 }
 
 const handleSnapshotError = error => console.log(error)
 
-onSnapshot(collectionGames, querySnapshot => {
-  if (!querySnapshot.metadata.hasPendingWrites) {
-    createDocLis(querySnapshot)
+onSnapshot(collectionGames, snapshot => {
+  if (!snapshot.metadata.hasPendingWrites) {
+    gamesList.innerHTML = ''
+    renderGameList(snapshot)
   }
 
 }, handleSnapshotError)
