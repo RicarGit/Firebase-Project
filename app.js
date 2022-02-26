@@ -22,33 +22,43 @@ const getFormattedDateAndTime = createdAt => new Intl
   .DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
   .format(createdAt.toDate())
 
+const renderGame = docChange => {
+  const [id, { title, developedBy, createdAt }] = [docChange.doc.id, docChange.doc.data()]
+
+  const gameTitle = document.createElement('h5')
+  gameTitle.textContent = title
+
+  const ul = document.createElement('ul')
+
+  const gameLi = document.createElement('li')
+  gameLi.setAttribute('class', 'my-4')
+  gameLi.setAttribute('data-id', id)
+
+  const button = document.createElement('button')
+  button.setAttribute('data-remove', id)
+  button.setAttribute('class', 'btn btn-danger btn-sm')
+  button.textContent = 'Remover'
+
+  const developedByLi = document.createElement('li')
+  developedByLi.textContent = `Desenvolvido por ${developedBy}`
+
+  const createdAtLi = document.createElement('li')
+  createdAtLi.textContent = `Adicionado no banco em ${getFormattedDateAndTime(createdAt)}`
+
+  gameLi.append(gameTitle, ul, button)
+  ul.append(developedByLi, createdAtLi)
+  gamesList.append(gameLi)
+}
+
 const renderGameList = snapshot => {
-  snapshot.docs.forEach(doc => {
-    const [id, { title, developedBy, createdAt }] = [doc.id, doc.data()]
+  snapshot.docChanges().forEach(docChange => {
+    if (docChange.type === 'removed') {
+      const gameLi = document.querySelector(`[data-id="${docChange.doc.id}"]`)
+      gameLi.remove()
+      return
+    }
 
-    const gameTitle = document.createElement('h5')
-    gameTitle.textContent = title
-
-    const ul = document.createElement('ul')
-
-    const gameLi = document.createElement('li')
-    gameLi.setAttribute('class', 'my-4')
-    gameLi.setAttribute('data-id', id)
-
-    const button = document.createElement('button')
-    button.setAttribute('data-remove', id)
-    button.setAttribute('class', 'btn btn-danger btn-sm')
-    button.textContent = 'Remover'
-
-    const developedByLi = document.createElement('li')
-    developedByLi.textContent = `Desenvolvido por ${developedBy}`
-
-    const createdAtLi = document.createElement('li')
-    createdAtLi.textContent = `Adicionado no banco em ${getFormattedDateAndTime(createdAt)}`
-
-    gameLi.append(gameTitle, ul, button)
-    ul.append(developedByLi, createdAtLi)
-    gamesList.append(gameLi)
+    renderGame(docChange)
   })
 }
 
@@ -91,7 +101,6 @@ const handleSnapshotError = error => console.log(error)
 
 onSnapshot(collectionGames, snapshot => {
   if (!snapshot.metadata.hasPendingWrites) {
-    gamesList.innerHTML = ''
     renderGameList(snapshot)
   }
 
